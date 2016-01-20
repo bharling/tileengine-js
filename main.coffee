@@ -88,13 +88,6 @@ quadKeyToTile = (quadKey) ->
 			else throw new Error('Invalid QuadKey')
 	[tx,ty,lod]
 
-
-# 07713138374
-
-# petercurnow99@icloud.com
-
-
-
 class Q
 	constructor: (@x, @y, @w, @h, @parent=null, @data=null) ->
 		@children = []
