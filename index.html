@@ -1,8 +1,28 @@
 <html>
 <head>
-	
+
 </head>
 <body>
+	<form id="controls" method="post" action="">
+	<div>
+		<label>Latitude</label>
+		<input type="number" id="id_latitude" name="latitude" value="51.3905059"/>
+	</div>
+
+	<div>
+		<label>Longitude</label>
+		<input type="number" id="id_longitude" name="longitude" value="-2.3581019"/>
+	</div>
+
+	<div>
+		<label>Zoom</label>
+		<input type="number" id="id_zoom" name="zoom" value="6"/>
+	</div>
+
+
+	<button type="submit">Go!</button>
+</form>
+
 	<canvas id="canvas" width="1024" height="1024"></canvas>
 	<script type="text/javascript" src="main.js"></script>
 	<script src="//localhost:35729/livereload.js"></script>

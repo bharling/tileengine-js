@@ -1,5 +1,5 @@
 (function() {
-  var EarthRadius, MaxLatitude, MaxLongitude, MinLatitude, MinLongitude, Q, c, can, clip, createTile, ct, drawQuadKey, groundResolution, latLonToPix, mapScale, mapSize, pixToLatLon, pixToTile, quadKeyToTile, tileToPix, tileToQuadKey;
+  var EarthRadius, MaxLatitude, MaxLongitude, MinLatitude, MinLongitude, Q, TOPLEFT, atPosition, c, can, clip, createTile, ct, drawQuadKey, exports, groundResolution, latLonToPix, mapScale, mapSize, pixToLatLon, pixToTile, quadKeyToTile, tileToPix, tileToQuadKey;
 
   can = document.getElementById('canvas');
 
@@ -15,12 +15,14 @@
 
   MaxLongitude = 180;
 
+  TOPLEFT = [0, 0];
+
   clip = function(val, min, max) {
     return Math.min(Math.max(val, min), max);
   };
 
   mapSize = function(lod) {
-    return 256 << lod >>> 0;
+    return (256 << lod) >>> 0;
   };
 
   groundResolution = function(latitude, lod) {
@@ -42,8 +44,8 @@
     ms = mapSize(lod);
     x = x * ms + 0.5;
     y = y * ms + 0.5;
-    px = clip(x, 0, ms - 1);
-    py = clip(y, 0, ms - 1);
+    px = (clip(x, 0, ms - 1)) | 0;
+    py = (clip(y, 0, ms - 1)) | 0;
     return [px, py];
   };
 
@@ -58,24 +60,24 @@
   };
 
   pixToTile = function(px, py) {
-    return [px / 256, py / 256];
+    return [(px / 256) | 0, (py / 256) | 0];
   };
 
   tileToPix = function(tx, ty) {
-    return [tx * 256, ty * 256];
+    return [(tx * 256) | 0, (ty * 256) | 0];
   };
 
   tileToQuadKey = function(tx, ty, lod) {
-    var digit, i, mask, quadKey;
+    var digit, i, j, mask, quadKey, ref;
     quadKey = "";
     i = lod;
-    while (i--) {
+    for (i = j = ref = lod; j >= 1; i = j += -1) {
       digit = 0;
       mask = 1 << (i - 1);
-      if (tx & mask !== 0) {
+      if ((tx & mask) !== 0) {
         digit++;
       }
-      if (ty & mask !== 0) {
+      if ((ty & mask) !== 0) {
         digit++;
         digit++;
       }
@@ -89,7 +91,7 @@
     tx = ty = 0;
     lod = i = quadKey.length;
     for (i = j = ref = lod; j >= 1; i = j += -1) {
-      mask = 1 << (i - 1);
+      mask = (1 << (i - 1)) | 0;
       t = lod - i;
       switch (quadKey[t]) {
         case "0":
@@ -152,7 +154,7 @@
         return results;
       } else {
         tile = createTile(this.x, this.y, this.w, this.h, this.data);
-        return ct.putImageData(tile, this.x, this.y);
+        return ct.putImageData(tile, 0, 0);
       }
     };
 
@@ -189,12 +191,27 @@
     return Q.fromQuadkey(quadKey).draw();
   };
 
-  drawQuadKey("00");
+  atPosition = function(lat, lon, zoom) {
+    var px, py, quadKey, ref, ref1, tx, ty;
+    ct.clearRect(0, 0, can.width, can.height);
+    ref = latLonToPix(lat, lon, zoom), px = ref[0], py = ref[1];
+    TOPLEFT = [px, py];
+    ref1 = pixToTile(px, py), tx = ref1[0], ty = ref1[1];
+    quadKey = tileToQuadKey(tx, ty, zoom);
+    drawQuadKey(quadKey);
+    return {
+      px: px,
+      py: py,
+      tx: tx,
+      ty: ty,
+      quadKey: quadKey
+    };
+  };
 
-  drawQuadKey("01");
+  atPosition(51.3905059, -40.3581019, 6);
 
-  drawQuadKey("02");
+  exports = typeof exports === 'undefined' ? window : exports;
 
-  drawQuadKey("03");
+  exports.atPosition = atPosition;
 
 }).call(this);
